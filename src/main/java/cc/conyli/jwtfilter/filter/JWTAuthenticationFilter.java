@@ -68,7 +68,7 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                 .compact();
 //        logger.info("生成的JWT是：|| " + JWTTOken + " ||");
         //故意设置一个特殊的状态码看看
-        response.setStatus(255);
+        response.setStatus(201);
         //响应头设置上Authorization信息
         response.setHeader(JWTUtils.TOKEN_HEADER, JWTTOken);
 

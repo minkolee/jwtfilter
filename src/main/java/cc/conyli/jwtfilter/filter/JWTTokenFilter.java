@@ -15,6 +15,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -22,6 +23,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * 这个过滤器可以配置在Spring Security中，也可以配置在Spring普通的@webFilter中，如果这么配置这个过滤器的顺序是在Spring Security之后的
+ * 此时就仅仅针对/api/vote来进行保护了。
+ * 此时由于逻辑，所以对于其他路径的访问，都需要认证，但是过滤器里根本就没有配置认证，所以一律是403 Forbidden
+ *
+ * 看来还是写在Spring Security里统一管理比较好，仅保留开放的端口，其他都封堵上
+ *
+ */
+
+//@WebFilter(urlPatterns = "/api/vote")
 public class JWTTokenFilter extends OncePerRequestFilter {
 
     private Logger logger = LoggerFactory.getLogger(getClass());
@@ -30,6 +41,8 @@ public class JWTTokenFilter extends OncePerRequestFilter {
     //重写实际进行过滤操作的doFilterInternal抽象方法
     @Override
     protected void doFilterInternal(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, FilterChain filterChain) throws ServletException, IOException {
+
+        logger.info("过滤器2执行了");
 
         //获取URL
         String targetPath = httpServletRequest.getRequestURI();
@@ -48,7 +61,7 @@ public class JWTTokenFilter extends OncePerRequestFilter {
                 authentication = getAuthenticationFromToken(JWTToken);
             } catch (Exception ex) {
                 logger.info(ex.toString());
-                httpServletResponse.setStatus(468);
+                httpServletResponse.setStatus(403);
                 return;
             }
             //如果成功拿到UsernamePasswordAuthenticationToken，设置到安全上下文上，然后放行
